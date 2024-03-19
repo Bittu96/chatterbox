@@ -67,8 +67,7 @@ func (h Handles) Login(c *gin.Context) {
 		return
 	}
 
-	errHash := auth.CompareHashPassword(user.Password, existingUser.Password)
-	if !errHash {
+	if match := auth.CompareHashPassword(user.Password, existingUser.Password); !match {
 		utils.FailureResponse(c, http.StatusForbidden, utils.InvalidPassword, nil)
 		return
 	}

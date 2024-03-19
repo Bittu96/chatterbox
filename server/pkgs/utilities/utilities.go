@@ -9,13 +9,13 @@ import (
 type StdResponse struct {
 	Status  string      `json:"status"`
 	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-	Error   interface{} `json:"error"`
+	Data    interface{} `json:"data,omitempty"`
+	Error   interface{} `json:"error,omitempty"`
 }
 
 type ErrorResponse struct {
-	Code    int         `json:"code"`
-	Message interface{} `json:"message"`
+	Code    int         `json:"code,omitempty"`
+	Message interface{} `json:"message,omitempty"`
 }
 
 func SuccessResponse(c *gin.Context, statusCode int, msg string, data interface{}) {

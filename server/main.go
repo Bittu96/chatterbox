@@ -23,64 +23,17 @@ const (
 	appPort = 8080
 )
 
-type Envs struct {
-	DB struct {
-		Host     string
-		Port     int
-		Password string
-		User     string
-		Database string
-	}
-	Redis struct {
-		Host     string
-		Port     string
-		Password string
-		User     string
-		Database string
-	}
-}
-
 func main() {
 	app := cli.NewApp()
 	app.Name = appName
 	app.Usage = appDesc
-	envs := Envs{}
 
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file", err)
-	}
-
-	// fmt.Println("envs", os.Environ())
-
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:        "DB_NAME",
-			Value:       "postgres",
-			Usage:       "database name",
-			Destination: &envs.DB.Database,
-		},
-		cli.StringFlag{
-			Name:        "DB_HOST",
-			Value:       "localhost",
-			Destination: &envs.DB.Host,
-		},
-		cli.StringFlag{
-			Name:        "DB_USER",
-			Value:       "postgres",
-			Usage:       "database name",
-			Destination: &envs.DB.User,
-		},
-		cli.IntFlag{
-			Name:        "DB_PORT",
-			Value:       5432,
-			Destination: &envs.DB.Port,
-		},
-		cli.StringFlag{
-			Name:        "DB_PASSWORD",
-			Value:       "postgres",
-			Destination: &envs.DB.Password,
-		},
+	} else {
+		// fmt.Println("envs", os.Environ())
+		fmt.Println("loaded", len(os.Environ()), "envs")
 	}
 
 	app.Action = func(ctx *cli.Context) {
@@ -104,19 +57,19 @@ func main() {
 		// }
 
 		//connect redis
-		rdClient, err := database.RedisConnect()
-		if err != nil {
-			return
-		}
+		// rdClient, err := database.RedisConnect()
+		// if err != nil {
+		// 	return
+		// }
 
 		//close redis
-		defer rdClient.Close()
+		// defer rdClient.Close()
 
 		//init data access service
 		daoService := dao.DAO{
 			PgClient: pgClient,
 			// MgClient: mgClient,
-			RdClient: rdClient,
+			// RdClient: rdClient,
 		}
 
 		//create handles
