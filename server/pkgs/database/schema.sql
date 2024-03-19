@@ -5,6 +5,7 @@ CREATE TABLE chatterbox.user (
     username varchar(64) UNIQUE NOT NULL,
     email varchar(64) UNIQUE NOT NULL,
     password varchar(64) NOT NULL,
+    role varchar(8) NOT NULL DEFAULT 'user',
     created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp DEFAULT NULL
 );

@@ -14,8 +14,8 @@ import (
 const (
 	host     = "localhost"
 	port     = 5432
-	user     = "eclipse"
-	password = "eclipse"
+	user     = "bittu"
+	password = "bittu"
 	dbname   = "postgres"
 )
 

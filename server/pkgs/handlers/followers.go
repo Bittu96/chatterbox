@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	utils "projects/chatterbox/server/pkgs/utilities"
 
@@ -10,13 +9,13 @@ import (
 
 // api to get all followers
 func (h Handles) GetFollowers(c *gin.Context) {
-	userId, found := c.Params.Get("auth_user_id")
-	if !found || userId == "" {
-		utils.FailureResponse(c, http.StatusForbidden, utils.UserNotFound, nil)
+	authUserId, found := c.Params.Get("auth_user_id")
+	if !found || authUserId == "" {
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	followers, err := h.Dao.GetFollowers(userId)
+	followers, err := h.Dao.GetFollowers(authUserId)
 	if err != nil {
 		utils.FailureResponse(c, http.StatusInternalServerError, utils.DaoFailureMsg, err.Error())
 		return
@@ -26,13 +25,13 @@ func (h Handles) GetFollowers(c *gin.Context) {
 }
 
 func (h Handles) GetFollowing(c *gin.Context) {
-	userId, found := c.Params.Get("auth_user_id")
-	if !found || userId == "" {
-		utils.FailureResponse(c, http.StatusForbidden, utils.UserNotFound, nil)
+	authUserId, found := c.Params.Get("auth_user_id")
+	if !found || authUserId == "" {
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	following, err := h.Dao.GetFollowing(userId)
+	following, err := h.Dao.GetFollowing(authUserId)
 	if err != nil {
 		utils.FailureResponse(c, http.StatusInternalServerError, utils.DaoFailureMsg, err.Error())
 		return
@@ -42,26 +41,19 @@ func (h Handles) GetFollowing(c *gin.Context) {
 }
 
 func (h Handles) FollowUser(c *gin.Context) {
-	followerId, found := c.Params.Get("auth_user_id")
-	if !found || followerId == "" {
-		utils.FailureResponse(c, http.StatusForbidden, utils.UserNotFound, nil)
+	authUserId, found := c.Params.Get("auth_user_id")
+	if !found || authUserId == "" {
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	followingId := c.Query("following_id")
-	if followingId == "" {
-		utils.FailureResponse(c, http.StatusUnprocessableEntity, utils.FollowingUserNotFound, nil)
+	followId := c.Query("follow_id")
+	if followId == "" || authUserId == followId {
+		utils.FailureResponse(c, http.StatusBadRequest, utils.BadRequestMsg, nil)
 		return
 	}
 
-	if followerId == followingId {
-		utils.FailureResponse(c, http.StatusUnprocessableEntity, utils.FollowingUserNotFound, nil)
-		return
-	}
-
-	err := h.Dao.FollowUser(followingId, followerId)
-	if err != nil {
-		fmt.Println(err)
+	if err := h.Dao.FollowUser(followId, authUserId); err != nil {
 		utils.FailureResponse(c, http.StatusInternalServerError, utils.DaoFailureMsg, err.Error())
 		return
 	}
@@ -70,20 +62,19 @@ func (h Handles) FollowUser(c *gin.Context) {
 }
 
 func (h Handles) UnfollowUser(c *gin.Context) {
-	followerId, found := c.Params.Get("auth_user_id")
-	if !found || followerId == "" {
-		utils.FailureResponse(c, http.StatusForbidden, utils.UserNotFound, nil)
+	authUserId, found := c.Params.Get("auth_user_id")
+	if !found || authUserId == "" {
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	followingId := c.Query("following_id")
-	if followingId == "" {
-		utils.FailureResponse(c, http.StatusUnprocessableEntity, utils.FollowingUserNotFound, nil)
+	followId := c.Query("follow_id")
+	if followId == "" || authUserId == followId {
+		utils.FailureResponse(c, http.StatusBadRequest, utils.BadRequestMsg, nil)
 		return
 	}
 
-	err := h.Dao.UnfollowUser(followingId, followerId)
-	if err != nil {
+	if err := h.Dao.UnfollowUser(followId, authUserId); err != nil {
 		utils.FailureResponse(c, http.StatusInternalServerError, utils.DaoFailureMsg, err.Error())
 		return
 	}

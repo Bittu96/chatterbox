@@ -92,39 +92,39 @@ func main() {
 		})
 
 		//public auth routes
-		v1 := routes.Group("/v1")
+		auth := routes.Group("/auth")
 		{
-			v1.POST("/register", handles.Register)
-			v1.POST("/login", handles.Login)
-			v1.GET("/logout", handles.Logout)
+			auth.POST("/register", handles.Register)
+			auth.POST("/login", handles.Login)
+			auth.GET("/users", handles.GetUsers)
 		}
 
 		//private user routes
-		v2 := routes.Group("/v2")
+		svc := routes.Group("/svc")
+		svc.Use(userAuthMiddleware())
 		{
-			v2.Use(BearerAuthMiddleware())
-			v2.GET("/home", handles.Home)
-			v2.GET("/users", handles.GetUsers)
-			v2.GET("/followers", handles.GetFollowers)
-			v2.GET("/following", handles.GetFollowing)
-			v2.GET("/follow", handles.FollowUser)
-			v2.GET("/unfollow", handles.UnfollowUser)
+			svc.GET("/logout", handles.Logout)
+			svc.GET("/home", handles.Home)
+			svc.GET("/followers", handles.GetFollowers)
+			svc.GET("/following", handles.GetFollowing)
+			svc.GET("/follow", handles.FollowUser)
+			svc.GET("/unfollow", handles.UnfollowUser)
 		}
 
 		//private admin routes
-		v3 := routes.Group("/v3")
+		admin := routes.Group("/admin")
+		admin.Use(adminAuthMiddleware())
 		{
-			v3.Use(BearerAuthMiddleware())
-			v3.POST("/admin", handles.Premium)
+			admin.POST("/admin", handles.Premium)
 		}
 
 		//private socket routes
-		v4 := routes.Group("/v4")
+		webs := routes.Group("/webs")
+		webs.Use(userAuthMiddleware())
 		{
-			// v2.Use(BearerAuthMiddleware())
 			// v4.GET("/chat/:room_id", handles.WebSocGin)
-			v4.GET("/chat/:user_id", handles.WebSocPrivate)
-			v4.GET("/todo_list.html", func(c *gin.Context) {
+			webs.GET("/chat/:user_id", handles.WebSocPrivate)
+			webs.GET("/todo_list.html", func(c *gin.Context) {
 				handles.WebSocPage(c.Writer, c.Request)
 			})
 		}
@@ -159,63 +159,70 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func CookieAuthMiddleware() gin.HandlerFunc {
+func userAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		cookie, err := c.Cookie("token")
+		sessionToken, err := c.Cookie("session_token")
+		if err != nil {
+			bearerToken := c.Request.Header.Get("Authorization")
+			if bearerToken == "" {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+
+			splitToken := strings.Split(bearerToken, " ")
+			if len(splitToken) != 2 {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+
+			sessionToken = splitToken[1]
+		}
+
+		claims, err := auth.ParseToken(sessionToken)
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		_, err = auth.ParseToken(cookie)
-		if err != nil {
+		if claims.Role != "user" && claims.Role != "admin" {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		// if claims.Role != "user" && claims.Role != "admin" {
-		// 	c.JSON(401, gin.H{"error": "unauthorized"})
-		// 	return
-		// }
-
-		// if claims.Role != "admin" {
-		// 	c.JSON(401, gin.H{"error": "unauthorized"})
-		// 	return
-		// }
-
+		c.AddParam("auth_user_id", fmt.Sprintf("%d", claims.UserId))
 		c.Next()
 	}
 }
 
-func BearerAuthMiddleware() gin.HandlerFunc {
+func adminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		bearerToken := c.Request.Header.Get("Authorization")
-		if bearerToken == "" {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
+		sessionToken, err := c.Cookie("session_token")
+		if err != nil {
+			bearerToken := c.Request.Header.Get("Authorization")
+			if bearerToken == "" {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+
+			splitToken := strings.Split(bearerToken, " ")
+			if len(splitToken) != 2 {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+
+			sessionToken = splitToken[1]
 		}
 
-		splitToken := strings.Split(bearerToken, " ")
-		if len(splitToken) != 2 {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
-
-		claims, err := auth.ParseToken(splitToken[1])
+		claims, err := auth.ParseToken(sessionToken)
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		// if claims.Role != "user" && claims.Role != "admin" {
-		// 	c.JSON(401, gin.H{"error": "unauthorized"})
-		// 	return
-		// }
-
-		// if claims.Role != "admin" {
-		// 	c.JSON(401, gin.H{"error": "unauthorized"})
-		// 	return
-		// }
+		if claims.Role != "admin" {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
 
 		c.AddParam("auth_user_id", fmt.Sprintf("%d", claims.UserId))
 		c.Next()

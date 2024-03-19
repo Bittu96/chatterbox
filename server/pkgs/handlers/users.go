@@ -26,13 +26,13 @@ func (h Handles) GetUsers(c *gin.Context) {
 }
 
 func (h Handles) Home(c *gin.Context) {
-	followerId, found := c.Params.Get("auth_user_id")
-	if !found || followerId == "" {
-		utils.FailureResponse(c, http.StatusForbidden, utils.UserNotFound, nil)
+	auth_user_id, found := c.Params.Get("auth_user_id")
+	if !found || auth_user_id == "" {
+		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	users, err := h.Dao.GetAllUserProfilesFromDatabase(followerId)
+	users, err := h.Dao.GetAllUserProfilesFromDatabase(auth_user_id)
 	if err != nil {
 		utils.FailureResponse(c, http.StatusBadRequest, utils.DaoFailureMsg, err.Error())
 		return

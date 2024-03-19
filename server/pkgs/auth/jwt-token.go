@@ -51,12 +51,12 @@ func SignToken(user dao.User) (string, string, int, error) {
 	sessionId := uuid.New().String()
 	claims := &Claims{
 		Role:      user.Role,
-		UserId:    user.Id,
+		UserId:    user.UserId,
 		SessionId: sessionId,
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    "www.chatterbox.in",
 			Audience:  "chatterboxes",
-			Subject:   fmt.Sprintf("chatterbox#%v#%v", user.Role, user.Id),
+			Subject:   fmt.Sprintf("chatterbox#%v#%v", user.Role, user.UserId),
 			ExpiresAt: JWtExpiry.Unix(),
 		},
 	}

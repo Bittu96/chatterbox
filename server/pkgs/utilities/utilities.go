@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,24 +17,20 @@ type ErrorResponse struct {
 }
 
 func SuccessResponse(c *gin.Context, statusCode int, msg string, data interface{}) {
-	responseBody := StdResponse{
+	c.JSON(statusCode, StdResponse{
 		Status:  "success",
 		Message: msg,
 		Data:    data,
-	}
-	fmt.Println(responseBody)
-	c.JSON(statusCode, responseBody)
+	})
 }
 
 func FailureResponse(c *gin.Context, statusCode int, msg string, err interface{}) {
 	if err != nil {
 		err = ErrorResponse{120, err}
 	}
-	responseBody := StdResponse{
+	c.JSON(statusCode, StdResponse{
 		Status:  "failure",
 		Message: msg,
 		Error:   err,
-	}
-	fmt.Println(responseBody)
-	c.JSON(statusCode, responseBody)
+	})
 }

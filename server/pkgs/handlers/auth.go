@@ -17,31 +17,33 @@ type Handles struct {
 func (h Handles) Register(c *gin.Context) {
 	var registerData dao.User
 
-	err := c.BindJSON(&registerData)
-	if err != nil {
+	if err := c.BindJSON(&registerData); err != nil {
 		utils.FailureResponse(c, http.StatusBadRequest, utils.BadRequestMsg, err.Error())
 		return
 	}
+
+	// validate := validator.New(validator.WithRequiredStructEnabled())
 
 	if registerData.Username == "" || registerData.Email == "" || registerData.Password == "" {
 		utils.FailureResponse(c, http.StatusBadRequest, utils.BadRequestMsg, nil)
 		return
 	}
 
-	isExistingUser, _, err := h.Dao.CheckExistingUser(registerData)
-	if err != nil {
+	if isExisting, _, err := h.Dao.CheckExistingUser(registerData); err != nil {
 		utils.FailureResponse(c, http.StatusInternalServerError, utils.DaoFailureMsg, err.Error())
 		return
-	}
-
-	if isExistingUser {
-		utils.FailureResponse(c, http.StatusUnprocessableEntity, utils.UserExists, nil)
+	} else if isExisting {
+		utils.FailureResponse(c, http.StatusBadRequest, utils.UserExists, nil)
 		return
 	}
 
-	err = h.Dao.AddUserToDatabase(registerData)
-	if err != nil {
-		utils.FailureResponse(c, http.StatusBadRequest, utils.DaoFailureMsg, err.Error())
+	if len(registerData.Password) < 8 {
+		utils.FailureResponse(c, http.StatusBadRequest, utils.MinPasswordLengthConflict, nil)
+		return
+	}
+
+	if err := h.Dao.AddUserToDatabase(registerData); err != nil {
+		utils.FailureResponse(c, http.StatusInternalServerError, utils.DaoFailureMsg, err.Error())
 		return
 	}
 
@@ -51,8 +53,8 @@ func (h Handles) Register(c *gin.Context) {
 // login service
 func (h Handles) Login(c *gin.Context) {
 	var user dao.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		utils.FailureResponse(c, http.StatusBadRequest, utils.BadRequestMsg, err.Error())
+	if err := c.ShouldBindJSON(&user); err != nil || user.Username == "" || user.Password == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
@@ -60,19 +62,17 @@ func (h Handles) Login(c *gin.Context) {
 	if err != nil {
 		utils.FailureResponse(c, http.StatusInternalServerError, utils.DaoFailureMsg, err.Error())
 		return
-	}
-
-	if !isExisting {
-		utils.FailureResponse(c, http.StatusForbidden, utils.UserNotFound, nil)
+	} else if !isExisting {
+		utils.FailureResponse(c, http.StatusBadRequest, utils.UnregisteredUser, nil)
 		return
 	}
 
 	if match := auth.CompareHashPassword(user.Password, existingUser.Password); !match {
-		utils.FailureResponse(c, http.StatusForbidden, utils.InvalidPassword, nil)
+		utils.FailureResponse(c, http.StatusBadRequest, utils.InvalidLoginRequest, nil)
 		return
 	}
 
-	sessionId, signedString, ttl, err := auth.SignToken(user)
+	sessionId, signedString, ttl, err := auth.SignToken(existingUser)
 	if err != nil {
 		utils.FailureResponse(c, http.StatusInternalServerError, "generate token failed", nil)
 		return
@@ -83,12 +83,13 @@ func (h Handles) Login(c *gin.Context) {
 }
 
 func (h Handles) Logout(c *gin.Context) {
-	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	c.SetCookie("session_id", "", -1, "/", "localhost", false, true)
+	c.SetCookie("session_token", "", -1, "/", "localhost", false, true)
 	utils.SuccessResponse(c, http.StatusOK, utils.UserLoggedOut, nil)
 }
 
 func startSession(c *gin.Context, sessionId, signedString string, ttl int) {
 	c.SetCookie("session_id", sessionId, int(ttl), "/", "localhost", false, true)
-	c.SetCookie("auth_session_id", signedString, int(ttl), "/", "localhost", false, true)
+	c.SetCookie("session_token", signedString, int(ttl), "/", "localhost", false, true)
 	// c.SetCookie(sessionId, "session data", int(ttl), "/", "localhost", false, true)
 }

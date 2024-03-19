@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	utils "projects/chatterbox/server/pkgs/utilities"
+	"strings"
 
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,26 +13,20 @@ import (
 )
 
 type User struct {
-	Id        int64       `sql:"id" json:"id"`
-	Username  string      `json:"username"`
-	Email     string      `json:"email"`
-	Password  string      `json:"password"`
-	Role      string      `json:"role"`
+	UserId    int64       `sql:"user_id" json:"user_id"`
+	Username  string      `json:"username" validate:"required"`
+	Email     string      `json:"email" validate:"required"`
+	Password  string      `json:"password" validate:"required"`
+	Role      string      `json:"role" validate:"required"`
 	CreatedAt interface{} `sql:"created_at" json:"created_at"`
 	UpdatedAt interface{} `sql:"updated_at" json:"updated_at"`
 }
 
-type Home struct {
-	Id        int64       `sql:"id" json:"id"`
+type Profile struct {
+	UserId    int64       `sql:"user_id" json:"user_id"`
 	Username  string      `json:"username"`
 	Email     string      `json:"email"`
 	Following int         `json:"following"`
-	CreatedAt interface{} `sql:"created_at" json:"created_at"`
-}
-
-type ShortUser struct {
-	Id        int64       `sql:"id" json:"id"`
-	Username  string      `json:"username"`
 	CreatedAt interface{} `sql:"created_at" json:"created_at"`
 }
 
@@ -41,96 +36,83 @@ type DAO struct {
 	RdClient *redis.Client
 }
 
-func (dao DAO) CheckExistingUser(userData User) (bool, User, error) {
-	var (
-		isExisting bool
-		users      []User
-		user       User
-	)
-
-	query := fmt.Sprintf("select id, username, password from users where username='%v' limit 1;", userData.Username)
+func (dao DAO) CheckExistingUser(userData User) (isExisting bool, user User, err error) {
+	query := fmt.Sprintf("select user_id, username, role, password from chatterbox.user where username='%v' limit 1;", userData.Username)
 	rows, err := dao.PgClient.Query(query)
 	if err != nil {
-		return isExisting, user, err
+		return
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		if err := rows.Scan(&user.Id, &user.Username, &user.Password); err != nil {
-			return isExisting, user, err
+		if err = rows.Scan(&user.UserId, &user.Username, &user.Role, &user.Password); err != nil {
+			return
+		} else {
+			isExisting = true
+			return
 		}
-		users = append(users, user)
 	}
 
-	if len(users) > 0 {
-		isExisting = true
-	}
-
-	fmt.Println("isExisting", isExisting)
-	return isExisting, user, nil
+	return
 }
 
 func (dao DAO) AddUserToDatabase(userData User) error {
-	pCost, err := bcrypt.Cost([]byte(userData.Password))
-	fmt.Println("pCost", pCost, err)
+	// pCost, err := bcrypt.Cost([]byte(userData.Password))
+	// fmt.Println("pCost", pCost, err)
 
-	pHash, err := bcrypt.GenerateFromPassword([]byte(userData.Password), bcrypt.DefaultCost)
-	if err != nil {
+	if passwordHash, err := bcrypt.GenerateFromPassword([]byte(userData.Password), bcrypt.DefaultCost); err != nil {
 		return err
+	} else {
+		query := fmt.Sprintf("insert into chatterbox.user (username, email, password) VALUES ('%s','%s','%s');", userData.Username, userData.Email, passwordHash)
+		if err = dao.execQuery(query); err != nil {
+			if strings.Contains(err.Error(), "user_email_key") {
+				return fmt.Errorf("email already in use")
+			} else {
+				return err
+			}
+		}
+		return nil
 	}
-
-	query := fmt.Sprintf("INSERT into users (username, email, password) VALUES ('%s','%s','%s') ON CONFLICT DO NOTHING;;", userData.Username, userData.Email, pHash)
-	return dao.execQuery(query)
 }
 
-func (dao DAO) GetAllUsersFromDatabase() ([]User, error) {
-	var (
-		users []User
-		user  User
-	)
-
-	query := "select id, username, email, password, created_at from users;"
+func (dao DAO) GetAllUsersFromDatabase() (users []User, err error) {
+	query := "select user_id, username, email, password, role, created_at from chatterbox.user;"
 	rows, err := dao.PgClient.Query(query)
 	if err != nil {
-		return nil, err
+		return
 	}
 	fmt.Println(rows, err)
 	defer rows.Close()
 
 	for rows.Next() {
-		if err := rows.Scan(&user.Id, &user.Username, &user.Email, &user.Password, &user.CreatedAt); err != nil {
-			return nil, err
+		var user User
+		if err = rows.Scan(&user.UserId, &user.Username, &user.Email, &user.Password, &user.Role, &user.CreatedAt); err != nil {
+			return
 		}
-		fmt.Println("user:", user)
 		users = append(users, user)
 	}
 
-	return users, err
+	return
 }
 
-func (dao DAO) GetAllUserProfilesFromDatabase(follower_id string) ([]Home, error) {
-	var (
-		user  Home
-		users []Home
-	)
-
-	query := fmt.Sprintf("select id, username, email, COALESCE(f.user_id, -1) as following, created_at from users u left join (select user_id, follower_id from followers where follower_id=%v) f on u.id=f.user_id where u.id<>%v;", follower_id, follower_id)
+func (dao DAO) GetAllUserProfilesFromDatabase(auth_user_id string) (profiles []Profile, err error) {
+	query := fmt.Sprintf("select u.user_id, u.username, u.email, COALESCE(f.user_id, 0) as following, u.created_at from chatterbox.user u left join (select user_id, follower_id from chatterbox.follower where follower_id=%v) f on u.user_id=f.user_id where u.user_id<>%v;", auth_user_id, auth_user_id)
 	rows, err := dao.PgClient.Query(query)
 	if err != nil {
-		return nil, err
+		return
 	}
 	fmt.Println(rows, err)
 	defer rows.Close()
 
 	for rows.Next() {
-		if err := rows.Scan(&user.Id, &user.Username, &user.Email, &user.Following, &user.CreatedAt); err != nil {
-			return nil, err
+		var profile Profile
+		if err = rows.Scan(&profile.UserId, &profile.Username, &profile.Email, &profile.Following, &profile.CreatedAt); err != nil {
+			return
 		}
-		fmt.Println("user:", user)
-		users = append(users, user)
+		profiles = append(profiles, profile)
 	}
 
-	return users, err
+	return
 }
 
 func (dao DAO) execQuery(queryString string) error {
@@ -143,54 +125,44 @@ func (dao DAO) execQuery(queryString string) error {
 	return nil
 }
 
-func (dao DAO) GetFollowers(userId string) ([]ShortUser, error) {
-	var (
-		user  ShortUser
-		users []ShortUser
-	)
-
-	query := fmt.Sprintf("select users.id, users.username, users.created_at from users left join followers on users.id=followers.user_id where user_id=%v;", userId)
+func (dao DAO) GetFollowers(userId string) (users []User, err error) {
+	query := fmt.Sprintf("select u.user_id, user.username, u.created_at from chatterbox.user u left join follower f on u.user_id=f.user_id where u.user_id=%v;", userId)
 	rows, err := dao.PgClient.Query(query)
 	if err != nil {
-		return nil, err
+		return
 	}
 	fmt.Println(rows, err)
 	defer rows.Close()
 
 	for rows.Next() {
-		if err := rows.Scan(&user.Id, &user.Username, &user.CreatedAt); err != nil {
-			return nil, err
+		var user User
+		if err = rows.Scan(&user.UserId, &user.Username, &user.CreatedAt); err != nil {
+			return
 		}
-		fmt.Println("user:", user)
 		users = append(users, user)
 	}
 
-	return users, err
+	return
 }
 
-func (dao DAO) GetFollowing(userId string) ([]ShortUser, error) {
-	var (
-		user  ShortUser
-		users []ShortUser
-	)
-
-	query := fmt.Sprintf("select users.id, users.username, users.created_at from users left join followers on users.id=followers.user_id where followers.follower_id=%v;", userId)
+func (dao DAO) GetFollowing(userId string) (users []User, err error) {
+	query := fmt.Sprintf("select u.user_id, u.username, u.created_at from chatterbox.user u left join chatterbox.follower f on u.user_id=f.user_id where f.follower_id=%v;", userId)
 	rows, err := dao.PgClient.Query(query)
 	if err != nil {
-		return nil, err
+		return
 	}
 	fmt.Println(rows, err)
 	defer rows.Close()
 
 	for rows.Next() {
-		if err := rows.Scan(&user.Id, &user.Username, &user.CreatedAt); err != nil {
-			return nil, err
+		var user User
+		if err = rows.Scan(&user.UserId, &user.Username, &user.CreatedAt); err != nil {
+			return
 		}
-		fmt.Println("user:", user)
 		users = append(users, user)
 	}
 
-	return users, err
+	return
 }
 
 func (dao DAO) FollowUser(followingId, followerId string) error {
