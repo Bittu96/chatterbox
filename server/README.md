@@ -1,10 +1,5 @@
 # Chatterbox
 
-# id
-19026372
-# token
-glpat-yFjfa16GB2XnfShV8hN2
-
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
