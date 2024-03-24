@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	utils "projects/chatterbox/server/pkgs/utilities"
+	"projects/chatterbox/server/pkgs/secrets"
 	"strings"
 
 	"github.com/redis/go-redis/v9"
@@ -176,7 +176,7 @@ func (dao DAO) UnfollowUser(followingId, followerId string) error {
 }
 
 func (dao DAO) SetRedisValue(ctx context.Context, key string, value interface{}) error {
-	rdResp := dao.RdClient.Set(ctx, key, value, utils.RedisChatExpiry)
+	rdResp := dao.RdClient.Set(ctx, key, value, secrets.RedisChatExpiry)
 	fmt.Println(rdResp)
 	return rdResp.Err()
 }

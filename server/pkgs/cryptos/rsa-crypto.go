@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	RSA_MASTER_KEY = utils.GetEnv("RSA_MASTER_KEY").(string)
+	RSA_MASTER_KEY = utils.GetEnv("RSA_MASTER_KEY")
 )
 
 func RSA() {

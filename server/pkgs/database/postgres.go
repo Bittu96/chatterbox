@@ -5,18 +5,18 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"projects/chatterbox/server/pkgs/secrets"
 	"time"
 
 	_ "github.com/lib/pq"
 )
 
-// local db
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "bittu"
-	password = "bittu"
-	dbname   = "postgres"
+var (
+	host     = secrets.Database.DB_Host
+	port     = secrets.Database.DB_Port
+	user     = secrets.Database.DB_User
+	password = secrets.Database.DB_Pass
+	dbname   = secrets.Database.DB_Name
 )
 
 // ec2 db

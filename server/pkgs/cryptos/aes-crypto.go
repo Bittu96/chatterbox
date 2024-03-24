@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	AES_256_MASTER_KEY = utils.GetEnv("AES_256_MASTER_KEY").(string)
+	AES_256_MASTER_KEY = utils.GetEnv("AES_256_MASTER_KEY")
 )
 
 func AES() {

@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	auth "projects/chatterbox/server/pkgs/auth"
@@ -13,131 +11,108 @@ import (
 	"projects/chatterbox/server/pkgs/handlers"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"github.com/urfave/cli"
-)
-
-const (
-	appName = "chatterbox"
-	appDesc = "Chat chat chat!"
-	appPort = 8080
 )
 
 func main() {
-	app := cli.NewApp()
-	app.Name = appName
-	app.Usage = appDesc
+	gin.SetMode(gin.ReleaseMode)
+	routes := gin.Default()
+	routes.Use(CORSMiddleware())
 
-	err := godotenv.Load()
+	//connect postgres db
+	pgClient, err := database.PostgresConnect()
 	if err != nil {
-		log.Fatal("Error loading .env file", err)
-	} else {
-		// fmt.Println("envs", os.Environ())
-		fmt.Println("loaded", len(os.Environ()), "envs")
+		return
 	}
 
-	app.Action = func(ctx *cli.Context) {
-		gin.SetMode(gin.ReleaseMode)
-		routes := gin.Default()
-		routes.Use(CORSMiddleware())
+	//close database
+	defer pgClient.Close()
 
-		//connect postgres db
-		pgClient, err := database.PostgresConnect()
-		if err != nil {
-			return
-		}
+	//connect mongo db
+	// mgClient, err := database.MongoConnect()
+	// if err != nil {
+	// 	return
+	// }
 
-		//close database
-		defer pgClient.Close()
+	//connect redis
+	// rdClient, err := database.RedisConnect()
+	// if err != nil {
+	// 	return
+	// }
 
-		//connect mongo db
-		// mgClient, err := database.MongoConnect()
-		// if err != nil {
-		// 	return
-		// }
+	//close redis
+	// defer rdClient.Close()
 
-		//connect redis
-		// rdClient, err := database.RedisConnect()
-		// if err != nil {
-		// 	return
-		// }
-
-		//close redis
-		// defer rdClient.Close()
-
-		//init data access service
-		daoService := dao.DAO{
-			PgClient: pgClient,
-			// MgClient: mgClient,
-			// RdClient: rdClient,
-		}
-
-		//create handles
-		handles := handlers.Handles{
-			Dao: daoService,
-		}
-
-		//test server connection
-		routes.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "pong",
-			})
-		})
-
-		routes.LoadHTMLFiles("./welcome.html")
-		routes.GET("/", func(c *gin.Context) {
-			c.HTML(http.StatusOK, "welcome.html", gin.H{
-				"content": "This is an welcome page...",
-			})
-		})
-
-		//public auth routes
-		auth := routes.Group("/auth")
-		{
-			auth.POST("/register", handles.Register)
-			auth.POST("/login", handles.Login)
-			auth.GET("/users", handles.GetUsers)
-		}
-
-		//private user routes
-		svc := routes.Group("/svc")
-		svc.Use(userAuthMiddleware())
-		{
-			svc.GET("/logout", handles.Logout)
-			svc.GET("/home", handles.Home)
-			svc.GET("/followers", handles.GetFollowers)
-			svc.GET("/following", handles.GetFollowing)
-			svc.GET("/follow", handles.FollowUser)
-			svc.GET("/unfollow", handles.UnfollowUser)
-		}
-
-		//private admin routes
-		admin := routes.Group("/admin")
-		admin.Use(adminAuthMiddleware())
-		{
-			admin.POST("/admin", handles.Premium)
-		}
-
-		//private socket routes
-		webs := routes.Group("/webs")
-		webs.Use(userAuthMiddleware())
-		{
-			// v4.GET("/chat/:room_id", handles.WebSocGin)
-			webs.GET("/chat/:user_id", handles.WebSocPrivate)
-			webs.GET("/todo_list.html", func(c *gin.Context) {
-				handles.WebSocPage(c.Writer, c.Request)
-			})
-		}
-
-		// for _, r := range routes.Routes() {
-		// 	fmt.Println(r.Method, r.Path)
-		// }
-
-		//run server
-		fmt.Println("server running on port.. :", appPort)
-		routes.Run(fmt.Sprintf(":%v", appPort))
+	//init data access service
+	daoService := dao.DAO{
+		PgClient: pgClient,
+		// MgClient: mgClient,
+		// RdClient: rdClient,
 	}
-	app.Run(os.Args)
+
+	//create handles
+	handles := handlers.Handles{
+		Dao: daoService,
+	}
+
+	//test server connection
+	routes.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+
+	routes.LoadHTMLFiles("./welcome.html")
+	routes.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "welcome.html", gin.H{
+			"content": "This is an welcome page...",
+		})
+	})
+
+	//public auth routes
+	auth := routes.Group("/auth")
+	{
+		auth.POST("/register", handles.Register)
+		auth.POST("/login", handles.Login)
+		auth.GET("/users", handles.GetUsers)
+	}
+
+	//private user routes
+	svc := routes.Group("/svc")
+	svc.Use(userAuthMiddleware())
+	{
+		svc.GET("/logout", handles.Logout)
+		svc.GET("/home", handles.Home)
+		svc.GET("/followers", handles.GetFollowers)
+		svc.GET("/following", handles.GetFollowing)
+		svc.GET("/follow", handles.FollowUser)
+		svc.GET("/unfollow", handles.UnfollowUser)
+	}
+
+	//private admin routes
+	admin := routes.Group("/admin")
+	admin.Use(adminAuthMiddleware())
+	{
+		admin.POST("/admin", handles.Premium)
+	}
+
+	//private socket routes
+	webs := routes.Group("/webs")
+	webs.Use(userAuthMiddleware())
+	{
+		// v4.GET("/chat/:room_id", handles.WebSocGin)
+		webs.GET("/chat/:user_id", handles.WebSocPrivate)
+		webs.GET("/todo_list.html", func(c *gin.Context) {
+			handles.WebSocPage(c.Writer, c.Request)
+		})
+	}
+
+	// for _, r := range routes.Routes() {
+	// 	fmt.Println(r.Method, r.Path)
+	// }
+
+	//run server
+	fmt.Println("server running on port.. :", 8080)
+	routes.Run(fmt.Sprintf(":%v", 8080))
 }
 
 func CORSMiddleware() gin.HandlerFunc {
