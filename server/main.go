@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	auth "projects/chatterbox/server/pkgs/auth"
+	"projects/chatterbox/server/pkgs/configs"
 	"projects/chatterbox/server/pkgs/dao"
 	"projects/chatterbox/server/pkgs/database"
 	"projects/chatterbox/server/pkgs/handlers"
@@ -13,8 +14,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
+func init() {
+	fmt.Printf("Service configuration : %+v\n", configs.ServerConfig)
+	configs.Load()
+	fmt.Printf("Service configuration : %+v\n", configs.ServerConfig)
+
 	gin.SetMode(gin.ReleaseMode)
+}
+
+func main() {
+
 	routes := gin.Default()
 	routes.Use(CORSMiddleware())
 
@@ -97,10 +106,10 @@ func main() {
 
 	//private socket routes
 	webs := routes.Group("/webs")
-	webs.Use(userAuthMiddleware())
+	webs.Use(socketAuthMiddleware())
 	{
 		// v4.GET("/chat/:room_id", handles.WebSocGin)
-		webs.GET("/chat/:user_id", handles.WebSocPrivate)
+		webs.GET("/chat/:sender_id/:receiver_id/:token", handles.WebSocPrivate)
 		webs.GET("/todo_list.html", func(c *gin.Context) {
 			handles.WebSocPage(c.Writer, c.Request)
 		})
@@ -139,6 +148,7 @@ func userAuthMiddleware() gin.HandlerFunc {
 		sessionToken, err := c.Cookie("session_token")
 		if err != nil {
 			bearerToken := c.Request.Header.Get("Authorization")
+			fmt.Println(bearerToken, bearerToken == "")
 			if bearerToken == "" {
 				c.AbortWithStatus(http.StatusUnauthorized)
 				return
@@ -195,6 +205,25 @@ func adminAuthMiddleware() gin.HandlerFunc {
 		}
 
 		if claims.Role != "admin" {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		c.AddParam("auth_user_id", fmt.Sprintf("%d", claims.UserId))
+		c.Next()
+	}
+}
+
+func socketAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sessionToken := c.Param("token")
+		claims, err := auth.ParseToken(sessionToken)
+		if err != nil {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		if claims.Role != "user" && claims.Role != "admin" {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

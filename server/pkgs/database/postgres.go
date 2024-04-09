@@ -5,36 +5,33 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"projects/chatterbox/server/pkgs/secrets"
+	"projects/chatterbox/server/pkgs/configs"
 	"time"
 
 	_ "github.com/lib/pq"
 )
 
 var (
-	host     = secrets.Database.DB_Host
-	port     = secrets.Database.DB_Port
-	user     = secrets.Database.DB_User
-	password = secrets.Database.DB_Pass
-	dbname   = secrets.Database.DB_Name
+	host     = configs.ServerConfig.DB_Host
+	port     = configs.ServerConfig.DB_Port
+	user     = configs.ServerConfig.DB_User
+	password = configs.ServerConfig.DB_Pass
+	dbname   = configs.ServerConfig.DB_Name
 )
-
-// ec2 db
-// const (
-// 	host     = "ec2-52-55-96-26.compute-1.amazonaws.com"
-// 	port     = 5432
-// 	user     = "postgres"
-// 	password = "postgres"
-// 	dbname   = "postgres"
-// )
 
 func PostgresConnect() (*sql.DB, error) {
 	_, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
+	fmt.Println("postgres creds", host, port, user, password, dbname)
 	// connection string
-	psqlConnectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	// fmt.Println("psqlConnectionString:", psqlConnectionString)
+	psqlConnectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		configs.ServerConfig.DB_Host,
+		configs.ServerConfig.DB_Port,
+		configs.ServerConfig.DB_User,
+		configs.ServerConfig.DB_User,
+		configs.ServerConfig.DB_Name)
+	fmt.Println("psqlConnectionString:", psqlConnectionString)
 
 	// open database
 	db, err := sql.Open("postgres", psqlConnectionString)

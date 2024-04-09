@@ -1,8 +1,9 @@
+-- Active: 1711619722854@@ec2-3-84-86-24.compute-1.amazonaws.com@5432@postgres
 CREATE SCHEMA chatterbox;
 
 CREATE TABLE chatterbox.user (
     user_id serial PRIMARY KEY,
-    username varchar(64) UNIQUE NOT NULL,
+    username varchar(64) UNIQUE,
     email varchar(64) UNIQUE NOT NULL,
     password varchar(64) NOT NULL,
     role varchar(8) NOT NULL DEFAULT 'user',

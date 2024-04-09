@@ -34,21 +34,16 @@ var clients []Client
 var conversation []Message
 
 func parseMessage(input, userId string) Message {
-	// inputArr := strings.Split(input, ":")
 	return Message{UserId: userId, Text: input, Timestamp: time.Now()}
 }
 
 func (h Handles) WebSocPrivate(c *gin.Context) {
-	// ctx := c.Request.Context()
-	auth_user_id, found := c.Params.Get("auth_user_id")
+	senderId, found := c.Params.Get("auth_user_id")
 	if !found {
 		log.Print("illegal ws connection request")
 		return
 	}
-	fmt.Println("auth_user_id", auth_user_id)
-
-	chatUserId := c.Param("chat_user_id")
-	fmt.Println("chatUserId", chatUserId)
+	fmt.Println("senderId", senderId)
 
 	// Upgrade upgrades the HTTP server connection to the WebSocket protocol.
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -77,8 +72,6 @@ func (h Handles) WebSocPrivate(c *gin.Context) {
 	// 	_ = conn.WriteMessage(1, message)
 	// }
 
-	userId := ""
-
 	// Continuously read and write message
 	for {
 		mt, message, err := conn.ReadMessage()
@@ -90,7 +83,7 @@ func (h Handles) WebSocPrivate(c *gin.Context) {
 			fmt.Println("empty message received")
 			continue
 		}
-		msg := parseMessage(string(message), userId)
+		msg := parseMessage(string(message), senderId)
 		conversation = append(conversation, msg)
 
 		// output := fmt.Sprintf("Current conversation: %v", conversation)
@@ -114,7 +107,7 @@ func (h Handles) WebSocPrivate(c *gin.Context) {
 		// }
 	}
 
-	fmt.Println(userId, "left the conversation")
+	fmt.Println(senderId, "left the conversation")
 }
 
 // func getSetConversation(ctx context.Context, userId int, conversation []string) {

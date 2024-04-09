@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"projects/chatterbox/server/pkgs/secrets"
+	"projects/chatterbox/server/pkgs/configs"
 	"strings"
 
 	"github.com/redis/go-redis/v9"
@@ -26,7 +26,7 @@ type Profile struct {
 	UserId    int64       `sql:"user_id" json:"user_id"`
 	Username  string      `json:"username"`
 	Email     string      `json:"email"`
-	Following int         `json:"following"`
+	Following bool        `json:"following"`
 	CreatedAt interface{} `sql:"created_at" json:"created_at"`
 }
 
@@ -96,7 +96,8 @@ func (dao DAO) GetAllUsersFromDatabase() (users []User, err error) {
 }
 
 func (dao DAO) GetAllUserProfilesFromDatabase(auth_user_id string) (profiles []Profile, err error) {
-	query := fmt.Sprintf("select u.user_id, u.username, u.email, COALESCE(f.user_id, 0) as following, u.created_at from chatterbox.user u left join (select user_id, follower_id from chatterbox.follower where follower_id=%v) f on u.user_id=f.user_id where u.user_id<>%v;", auth_user_id, auth_user_id)
+	// query := fmt.Sprintf("select u.user_id, u.username, u.email, 'COALESCE(f.user_id, 0)' as following, u.created_at from chatterbox.user u left join (select user_id, follower_id from chatterbox.follower where follower_id=%v) f on u.user_id=f.user_id where u.user_id<>%v;", auth_user_id, auth_user_id)
+	query := fmt.Sprintf("select u.user_id, u.username, u.email, f.user_id is not null as following, u.created_at from chatterbox.user u left join (select user_id, follower_id from chatterbox.follower where follower_id=%v) f on u.user_id=f.user_id where u.user_id<>%v;", auth_user_id, auth_user_id)
 	rows, err := dao.PgClient.Query(query)
 	if err != nil {
 		return
@@ -166,17 +167,17 @@ func (dao DAO) GetFollowing(userId string) (users []User, err error) {
 }
 
 func (dao DAO) FollowUser(followingId, followerId string) error {
-	followQuery := fmt.Sprintf("insert into followers (user_id, follower_id) values (%v,%v) ON CONFLICT DO NOTHING;", followingId, followerId)
+	followQuery := fmt.Sprintf("insert into chatterbox.follower (user_id, follower_id) values (%v,%v) ON CONFLICT DO NOTHING;", followingId, followerId)
 	return dao.execQuery(followQuery)
 }
 
 func (dao DAO) UnfollowUser(followingId, followerId string) error {
-	unfollowQuery := fmt.Sprintf("delete from followers where user_id=%v and follower_id=%v;", followingId, followerId)
+	unfollowQuery := fmt.Sprintf("delete from chatterbox.follower where user_id=%v and follower_id=%v;", followingId, followerId)
 	return dao.execQuery(unfollowQuery)
 }
 
 func (dao DAO) SetRedisValue(ctx context.Context, key string, value interface{}) error {
-	rdResp := dao.RdClient.Set(ctx, key, value, secrets.RedisChatExpiry)
+	rdResp := dao.RdClient.Set(ctx, key, value, configs.RedisChatExpiry)
 	fmt.Println(rdResp)
 	return rdResp.Err()
 }

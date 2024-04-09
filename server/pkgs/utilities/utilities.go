@@ -31,6 +31,7 @@ func SuccessResponse(c *gin.Context, statusCode int, msg string, data interface{
 }
 
 func FailureResponse(c *gin.Context, statusCode int, msg string, err interface{}) {
+	fmt.Println("error:", err)
 	if err != nil {
 		err = ErrorResponse{120, err}
 	}
@@ -42,25 +43,18 @@ func FailureResponse(c *gin.Context, statusCode int, msg string, err interface{}
 }
 
 func LoadEnvs() {
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file", err)
-	} else {
-		fmt.Println("envs", os.Environ())
-		fmt.Println("loaded", len(os.Environ()), "envs")
 	}
 }
 
 func GetEnv(key string) (value string) {
 	if value = os.Getenv(key); value == "" {
-		if err := godotenv.Load(); err != nil {
+		if err := godotenv.Load(".env.local"); err != nil {
 			log.Fatal("Error loading .env file", err)
 		} else {
 			if value = os.Getenv(key); value == "" {
 				log.Fatalf("env key %v not found", key)
-			} else {
-				fmt.Println("envs", os.Environ())
-				fmt.Println("loaded", len(os.Environ()), "envs")
 			}
 		}
 	}

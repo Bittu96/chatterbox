@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	auth "projects/chatterbox/server/pkgs/auth"
 	"projects/chatterbox/server/pkgs/dao"
@@ -54,6 +55,7 @@ func (h Handles) Register(c *gin.Context) {
 func (h Handles) Login(c *gin.Context) {
 	var user dao.User
 	if err := c.ShouldBindJSON(&user); err != nil || user.Username == "" || user.Password == "" {
+		fmt.Println("error:", err, user.Username == "", user.Password == "")
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
