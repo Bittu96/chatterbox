@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Home from "@/app/components/home/page";
 import { SubmitButton } from "@/app/components/buttons/submit-button";
 import SignOutDialog from "./components/dialogs/page";
+import SetCookie from "@/app/api/websocket/websocket"
 
 export default async function Page() {
   console.log("checking session");
@@ -85,38 +86,35 @@ export default async function Page() {
             </svg>
             Chat
           </button>
+          <ChatRedirect/>
         </div>
 
         <hr />
 
-        <Home />
+        <Home profile={profile} />
 
         <hr />
 
         <div className="items-center justify-center pt-6 px-16 text-center">
-          {/* <SignOut /> */}
-          <SignOutDialog params={signOutAction} />
+          <SignOutDialog />
         </div>
       </div>
     </div>
   );
 }
 
-function SignOut() {
+function ChatRedirect() {
   return (
     <form
-      action={async () => {
-        "use server";
-        await signOut();
-      }}
+      action={SetCookie}
     >
-      <SubmitButton>Sign out</SubmitButton>
+      <SubmitButton>Chat</SubmitButton>
     </form>
   );
 }
 
-const signOutAction = async function () {
-  "use server";
-  console.log("sign out called");
-  await signOut({ redirect: true, redirectTo: "/" });
-};
+// const signOutAction = async function () {
+//   "use server";
+//   console.log("sign out called");
+//   await signOut({ redirect: true, redirectTo: "/" });
+// };

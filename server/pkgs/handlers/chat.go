@@ -38,11 +38,12 @@ func parseMessage(input, userId string) Message {
 }
 
 func (h Handles) WebSocPrivate(c *gin.Context) {
-	senderId, found := c.Params.Get("auth_user_id")
-	if !found {
-		log.Print("illegal ws connection request")
-		return
-	}
+	// senderId, found := c.Params.Get("auth_user_id")
+	// if !found {
+	// 	log.Print("illegal ws connection request")
+	// 	return
+	// }
+	senderId := c.Param("sender_id")
 	fmt.Println("senderId", senderId)
 
 	// Upgrade upgrades the HTTP server connection to the WebSocket protocol.

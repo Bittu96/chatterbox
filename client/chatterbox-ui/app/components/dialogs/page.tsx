@@ -5,9 +5,7 @@ import { Fragment, useState } from "react";
 import { signOut } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 
-export default function SignOutDialog(params: any) {
-  let signOutFunction = params;
-
+export default function SignOutDialog() {
   let [isOpen, setIsOpen] = useState(false);
 
   function closeModal() {
@@ -93,23 +91,4 @@ export default function SignOutDialog(params: any) {
       </Transition>
     </>
   );
-}
-
-function SignOut() {
-  redirect("/api/auth/signout/google")
-  // return (
-  //   redirect("/api/auth/signout/google")
-  //   // <form
-  //   //   action={async () => {
-  //   //     await signOut();
-  //   //   }}
-  //   // >
-  //   //   <button
-  //   //     type="submit"
-  //   //     className="w-100 inline-flex justify-center rounded-md border border-transparent  px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-  //   //   >
-  //   //     Sign out
-  //   //   </button>
-  //   // </form>
-  // );
 }

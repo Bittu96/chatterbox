@@ -1,97 +1,17 @@
-.card {
-  background: #fff;
-  transition: 0.5s;
-  border: solid 1px lightgrey;
-  border-radius: 0.55rem;
-  position: relative;
+.chat {
+  background-color: white;
   width: 100%;
-  min-height: 500px;
-  /* box-shadow: 0 1px 2px 0 rgb(0 0 0 / 10%); */
+  /* margin: auto; */
+  /* border: 2px solid blue; */
 }
-
-.chat-app .people-list {
-  width: 280px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  padding: 20px;
-  z-index: 7;
-}
-
-.chat-app .chat {
-  margin-left: 280px;
-  border-left: 1px solid #eaeaea;
-}
-
-.people-list {
-  -moz-transition: 0.5s;
-  -o-transition: 0.5s;
-  -webkit-transition: 0.5s;
-  transition: 0.5s;
-}
-
-.people-list .chat-list li {
-  padding: 10px 15px;
-  list-style: none;
-  border-radius: 3px;
-}
-
-.people-list .chat-list li:hover {
-  background: #efefef;
-  cursor: pointer;
-}
-
-.people-list .chat-list li.active {
-  background: #efefef;
-}
-
-.people-list .chat-list li .name {
-  font-size: 15px;
-}
-
-.people-list .chat-list img {
-  width: 45px;
-  border-radius: 50%;
-}
-
-.people-list img {
-  float: left;
-  border-radius: 50%;
-}
-
-.people-list .about {
-  float: left;
-  padding-left: 8px;
-}
-
-.people-list .status {
-  color: #999;
-  font-size: 13px;
-}
-
-.chat .chat-header {
-  padding: 15px 20px;
-  border-bottom: 2px solid #f4f7f6;
-}
-
-.chat .chat-header img {
-  float: left;
-  border-radius: 40px;
-  width: 40px;
-}
-
-.chat .chat-header .chat-about {
-  float: left;
-  padding-left: 10px;
-}
-
 .chat .chat-history {
-  padding: 20px;
-  border-bottom: 2px solid #fff;
-  overflow-y: scroll;
+  /* padding: 20px; */
+  background-color: white;
+  /* border: 2px solid red; */
+  overflow-y: auto;
   min-height: 400px;
   max-height: 60vh;
-  width: 50vh;
+  width: 100%;
 }
 
 .chat .chat-history ul {
@@ -183,7 +103,16 @@
 }
 
 .chat .chat-message {
-  padding: 20px;
+  /* padding: 20px; */
+  /* border: 2px solid red; */
+
+  width: 100%;
+}
+.chat .chat-message input {
+  /* padding: 20px; */
+  /* border: 2px solid red; */
+
+  width: 100%;
 }
 
 .online,

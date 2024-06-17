@@ -1,0 +1,128 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "chatterbox",
+    "dateExported": "2024-04-14T05:50:21.187Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "acef5682-1769-46d4-a8f2-3bfa1d0e4826",
+            "name": "auth",
+            "containerId": "",
+            "created": "2024-03-19T07:04:57.140Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "7004d4cb-da87-4803-a6b4-6809e89ad036",
+            "name": "svc",
+            "containerId": "",
+            "created": "2024-03-19T12:42:06.551Z",
+            "sortNum": 20000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "c3b78713-657d-41f9-b080-e46500536b00",
+            "colId": "1f74b5b7-11e3-4531-9d86-4d2be4870ff4",
+            "containerId": "7004d4cb-da87-4803-a6b4-6809e89ad036",
+            "name": "users",
+            "url": "http://localhost:8080/auth/users",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2024-03-19T12:22:07.672Z",
+            "modified": "2024-03-19T13:13:27.469Z",
+            "headers": [],
+            "params": [],
+            "reqType": "get",
+            "tests": []
+        },
+        {
+            "_id": "984128eb-70ae-4607-9bda-8736f1f8ddec",
+            "colId": "1f74b5b7-11e3-4531-9d86-4d2be4870ff4",
+            "containerId": "7004d4cb-da87-4803-a6b4-6809e89ad036",
+            "name": "logout",
+            "url": "http://localhost:8080/svc/logout",
+            "method": "GET",
+            "sortNum": 15000,
+            "created": "2024-03-19T12:42:41.887Z",
+            "modified": "2024-03-19T13:09:49.648Z",
+            "headers": [],
+            "params": [],
+            "reqType": "get",
+            "tests": []
+        },
+        {
+            "_id": "c446d912-4c83-481f-84b0-c0121535b130",
+            "colId": "1f74b5b7-11e3-4531-9d86-4d2be4870ff4",
+            "containerId": "acef5682-1769-46d4-a8f2-3bfa1d0e4826",
+            "name": "login",
+            "url": "http://localhost:8080/auth/login",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-03-19T07:05:07.546Z",
+            "modified": "2024-03-19T12:21:04.158Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\": \"d\",\n  \"password\": \"aaaaaaaa\"\n}",
+                "form": []
+            },
+            "reqType": "post",
+            "tests": []
+        },
+        {
+            "_id": "5a547c9e-0ecb-4b35-99cf-31172ec4e187",
+            "colId": "1f74b5b7-11e3-4531-9d86-4d2be4870ff4",
+            "containerId": "7004d4cb-da87-4803-a6b4-6809e89ad036",
+            "name": "home",
+            "url": "http://localhost:8080/svc/home",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-03-19T12:34:44.737Z",
+            "modified": "2024-03-19T13:29:56.214Z",
+            "headers": [],
+            "params": [],
+            "reqType": "get",
+            "tests": []
+        },
+        {
+            "_id": "4f416cbf-d7a4-4444-81c9-a818a8b5655e",
+            "colId": "1f74b5b7-11e3-4531-9d86-4d2be4870ff4",
+            "containerId": "acef5682-1769-46d4-a8f2-3bfa1d0e4826",
+            "name": "register",
+            "url": "http://localhost:8080/auth/register",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2024-03-19T12:08:00.147Z",
+            "modified": "2024-04-09T12:57:35.663Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\": \"abc\",\n  \"password\": \"aaaaaaaa\",\n  \"email\": \"abc.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "c054f26b-bbfe-42a5-b103-d4b764fed3cb",
+            "colId": "1f74b5b7-11e3-4531-9d86-4d2be4870ff4",
+            "containerId": "7004d4cb-da87-4803-a6b4-6809e89ad036",
+            "name": "follow",
+            "url": "http://localhost:8080/svc/follow?follow_id=68",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2024-04-09T13:11:13.588Z",
+            "modified": "2024-04-09T13:13:06.223Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "follow_id",
+                    "value": "68",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        }
+    ]
+}

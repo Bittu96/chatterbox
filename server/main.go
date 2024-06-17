@@ -23,11 +23,17 @@ func init() {
 }
 
 func main() {
-
 	routes := gin.Default()
 	routes.Use(CORSMiddleware())
 
 	//connect postgres db
+	// pg := database.Database{
+	// 	host:     configs.ServerConfig.DB_Host,
+	// 	port:     configs.ServerConfig.DB_Port,
+	// 	user:     configs.ServerConfig.DB_User,
+	// 	password: configs.ServerConfig.DB_Pass,
+	// 	dbname:   configs.ServerConfig.DB_Name,
+	// }
 	pgClient, err := database.PostgresConnect()
 	if err != nil {
 		return
@@ -106,7 +112,7 @@ func main() {
 
 	//private socket routes
 	webs := routes.Group("/webs")
-	webs.Use(socketAuthMiddleware())
+	// webs.Use(socketAuthMiddleware())
 	{
 		// v4.GET("/chat/:room_id", handles.WebSocGin)
 		webs.GET("/chat/:sender_id/:receiver_id/:token", handles.WebSocPrivate)

@@ -3,7 +3,7 @@ import { FollowButton } from "../buttons/follow-button";
 const people = [
   {
     name: "Leslie Alexander",
-    email: "leslie.alexander@example.com",
+    email: "leslie.alex8ander@example.com",
     follow: true,
     imageUrl:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -12,7 +12,7 @@ const people = [
   },
   {
     name: "Michael Foster",
-    email: "michael.foster@example.com",
+    email: "michael.fost6er@example.com",
     follow: true,
     imageUrl:
       "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -21,7 +21,7 @@ const people = [
   },
   {
     name: "Dries Vincent",
-    email: "dries.vincent@example.com",
+    email: "drie6s.vincent@example.com",
     follow: false,
     imageUrl:
       "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -29,7 +29,7 @@ const people = [
   },
   {
     name: "Lindsay Walton",
-    email: "lindsay.walton@example.com",
+    email: "lindsay.wal5ton@example.com",
     follow: false,
     imageUrl:
       "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -38,7 +38,7 @@ const people = [
   },
   {
     name: "Courtney Henry",
-    email: "courtney.henry@example.com",
+    email: "courtney.hen3ry@example.com",
     follow: false,
     imageUrl:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -47,7 +47,7 @@ const people = [
   },
   {
     name: "Tom Cook",
-    email: "tom.cook@example.com",
+    email: "tom.c3ook@example.com",
     follow: false,
     imageUrl:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -55,7 +55,7 @@ const people = [
   },
   {
     name: "Leslie Alexander",
-    email: "leslie.alexander@example.com",
+    email: "leslie.alexa3nder@example.com",
     follow: true,
     imageUrl:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -64,7 +64,7 @@ const people = [
   },
   {
     name: "Michael Foster",
-    email: "michael.foster@example.com",
+    email: "michael.foster5@example.com",
     follow: true,
     imageUrl:
       "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -73,7 +73,7 @@ const people = [
   },
   {
     name: "Dries Vincent",
-    email: "dries.vincent@example.com",
+    email: "dries.vincen4t@example.com",
     follow: false,
     imageUrl:
       "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -81,7 +81,7 @@ const people = [
   },
   {
     name: "Lindsay Walton",
-    email: "lindsay.walton@example.com",
+    email: "lindsay.walton3@example.com",
     follow: false,
     imageUrl:
       "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -90,7 +90,7 @@ const people = [
   },
   {
     name: "Courtney Henry",
-    email: "courtney.henry@example.com",
+    email: "courtney.henry2@example.com",
     follow: false,
     imageUrl:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
@@ -99,7 +99,7 @@ const people = [
   },
   {
     name: "Tom Cook",
-    email: "tom.cook@example.com",
+    email: "tom.cook1@example.com",
     follow: false,
     imageUrl:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
