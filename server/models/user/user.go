@@ -10,18 +10,18 @@ type User struct {
 	UpdatedAt interface{} `sql:"updated_at" json:"updated_at"`
 }
 
-func (u User) Check() {
+// func (u User) Check() {
 
-}
+// }
 
-func (u User) Add() {
+// func (u User) Add() {
 
-}
+// }
 
-func (u User) Delete() {
+// func (u User) Delete() {
 
-}
+// }
 
-func (u User) Update() {
+// func (u User) Update() {
 
-}
+// }
